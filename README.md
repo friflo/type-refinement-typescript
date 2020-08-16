@@ -15,11 +15,19 @@ Showing some small examples this would allow to e.g.:
         return regex.test(val) ? (val as IsoDateTime) : undefined;
     }
 
-    const isoTimeOk: IsoDate = "2020-08-16T13:57:12.123Z"; // OK
-    const isoTimeErr: IsoDate = "16/8/2020"; // type refinement 'IsoDate' violates 'isIsoDate()'
+    const isoDateOk: IsoDateTime = "2020-08-16T13:57:12.123Z"; // OK
+    const isoDateErr: IsoDateTime = "16/8/2020"; // type refinement 'IsoDateTime' violates 'isIsoDateTime()'
+
+    function testDateTime(val: string) {
+        if (isIsoDateTime(val)) {
+            val; //  refines to IsoDateTime if type refinement is enabled; Otherwise string
+        } else {
+            const dst: IsoDateTime = val; // is always string; with refinement - error: Type 'string' is not assignable to type 'IsoDateTime'.
+        }
+    }
     ```
 
--   adding a refined type to express that an object validates to the invariant.
+-   adding a refined type to express that an object validates to the invariant defined by the refinement function.
 
     ```ts
     interface IOrganization {
@@ -81,12 +89,12 @@ Showing some small examples this would allow to e.g.:
 
 ## Use cases
 
--   Validate example literals used to illustrate usage of complex type hierarchy (hundreds of class) at compile time.
+-   Validate example literals used to illustrate usage of a complex type hierarchy (hundreds of classes) at compile time.
     This is especially very helpful for developers which are new to Typescript and/or new to a complex type hierarchy.
 
 -   Create / validate / enhance unit tests especially for type declarations in DefinitelyTyped.
 
--   Represent & validate the regular expression pattern's and format's used in JSON Schema at compile time
+-   Represent & validate `pattern` and `format` annotated to properties in JSON Schema at compile time
 
 -   Represent & validate the invariant of objects with inter-property dependencies at compile time
 
