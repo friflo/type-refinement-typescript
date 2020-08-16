@@ -3,49 +3,56 @@
 The main goal of this proposal is to reflect constrains on primitives and objects via the type system.  
 To support this Typescript may introduce type refinement to express these constraints.
 
-Showing some small examples this would allow to e.g.:
+## Examples
 
--   the string representation of a Date validates to a RegExp and apply a specific type at compile time.
+### Type refinement for a primitive type
 
-    ```ts
-    type IsoDateTime = TypeRefinement<string, typeof isIsoDateTime>;
+Refine the representation of a date string to `IsoDateTime` validated by the refinement function `isIsoDateTime()`
+to enable compile time validation with a RegExp and
+control flow based type analysis.
 
-    function isIsoDateTime(val: string): IsoDateTime | undefined {
-        const regex = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
-        return regex.test(val) ? (val as IsoDateTime) : undefined;
+```ts
+type IsoDateTime = TypeRefinement<string, typeof isIsoDateTime>;
+
+function isIsoDateTime(val: string): IsoDateTime | undefined {
+    const regex = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
+    return regex.test(val) ? (val as IsoDateTime) : undefined;
+}
+
+const isoDateOk: IsoDateTime = "2020-08-16T13:57:12.123Z"; // OK
+const isoDateErr: IsoDateTime = "16/8/2020"; // error: type refinement 'IsoDateTime' violates 'isIsoDateTime()'
+
+function testDateTime(val: string) {
+    if (isIsoDateTime(val)) {
+        val; //  refines to IsoDateTime if type refinement is enabled; Otherwise string
+    } else {
+        const dst: IsoDateTime = val; // is always string; with refinement - error: Type 'string' is not assignable to type 'IsoDateTime'.
     }
+}
+```
 
-    const isoDateOk: IsoDateTime = "2020-08-16T13:57:12.123Z"; // OK
-    const isoDateErr: IsoDateTime = "16/8/2020"; // type refinement 'IsoDateTime' violates 'isIsoDateTime()'
+### Type refinement for an object type
 
-    function testDateTime(val: string) {
-        if (isIsoDateTime(val)) {
-            val; //  refines to IsoDateTime if type refinement is enabled; Otherwise string
-        } else {
-            const dst: IsoDateTime = val; // is always string; with refinement - error: Type 'string' is not assignable to type 'IsoDateTime'.
-        }
-    }
-    ```
+Refine the representation of an interface to its invariant type `Organization` validated by the refinement function `isValidOrganization()`
+to enable compile time validation and control flow based type analysis.
 
--   adding a refined type to express that an object validates to the invariant defined by the refinement function.
+```ts
+interface IOrganization {
+    employeeCount: number;
+    externalCount: number;
+}
 
-    ```ts
-    interface IOrganization {
-        employeeCount: number;
-        externalCount: number;
-    }
+type Organization = TypeRefinement<IOrganization, typeof isValidOrganization>;
 
-    type Organization = TypeRefinement<IOrganization, typeof isValidOrganization>;
+function isValidOrganization(val: IOrganization): Organization | undefined {
+    return val.externalCount < val.employeeCount ? val : undefined;
+}
 
-    function isValidOrganization(val: IOrganization): Organization | undefined {
-        return val.externalCount < val.employeeCount ? val : undefined;
-    }
-
-    const organization: Organization = {
-        employeeCount: 20,
-        externalCount: 5
-    }; // OK
-    ```
+const organization: Organization = {
+    employeeCount: 20,
+    externalCount: 5
+}; // OK (5 < 20)
+```
 
 ## Goals
 
