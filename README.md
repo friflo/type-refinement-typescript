@@ -100,7 +100,7 @@ Showing some small examples this would allow to e.g.:
 
 ## Compile time / malicious code
 
-A requirement of this PR is that user code need to be executed at compile time.
+A requirement of this proposal is that user code need to be executed at compile time.
 So concerns about increased compile time and malicious validation code are valid.
 
 As this feature is designed as Opt-In those concerns can be solved by simply not using it.
@@ -110,13 +110,13 @@ As this feature is designed as Opt-In those concerns can be solved by simply not
 A valid concern about validation expressions is that authors of DefinitelyTyped may introduce validations to every type.  
 See: https://github.com/microsoft/TypeScript/issues/6579#issuecomment-542405537
 
-As this PR is not using meta data (via d.ts files) for validation only the 3rd party authors are able to introduce validation functions.  
+As this proposal is not using meta data (via d.ts files) for validation only the 3rd party authors are able to introduce validation functions.  
 Authors of DefinitelyTyped have only the possibility to utilize these validation functions for refined types.
 
 ## Compatibility
 
 By using only two simple generics and returning the base type T in `TypeRefinement`
-this PR preserves backward compatibility to early Typescript versions.
+this proposal preserves backward compatibility to early Typescript versions.
 
 -   requires no change or extension of Typescript syntax
 -   requires a specific handling by the compiler when assigning a refinement function to a refined type. More at docs of `TypeRefinement`
@@ -125,7 +125,7 @@ this PR preserves backward compatibility to early Typescript versions.
 
 As Typescript is designed to be a structural typed language (instead of a nominal typed language) it may be useful to apply this to refined types.
 A refined typed may get (implicitly) an additional property 'refinementFcn' with the signature of the refinementFcn.
-So two individual type refinements are considered as equal if the have the same signature of the refinement function.
+So two individual type refinements are considered as equal if the have the same function signature.
 
 As a result:
 
@@ -135,3 +135,36 @@ As a result:
 ## Naming
 
 Alternative naming could by: type restriction, reduction or constraint
+
+## Implementation
+
+This proposal requires adding a generic type `TypeRefinement` which is known thy the compiler to apply specific handling.
+
+```ts
+// --- lib.*.d.ts - predefined type refinement types
+
+/**
+ * A type refinement function is used as a validation function inside a TypeRefinement. Its signature is:
+ *
+ *     (val: <base type>) => <refined type> | undefined
+ *
+ * @result { msg: string }) - May be used to return a descriptive validation error
+ */
+type RefinementFcn<T> = (val: T, result?: { msg: string }) => T | undefined;
+
+/**
+ * TypeRefinement defines a refined type by creating a bi-directional relation of the refined type (MyType)
+ * and its refinement function (isMyType). E.g. MyType <-> isMyType
+ *
+ *    function isMyType(val: string): MyType { return <MyType constraints fulfilled> ? val : undefined; }
+ *    type MyType = TypeRefinement<string, typeof isMyType>;
+ *
+ * In case type refinement is enabled typeof inside a TypeRefinement create the described relation above.
+ * When using refined types in code it enables:
+ * - Execute refinementFcn to validate refined type for literals.
+ * - Refine a type when calling the refinementFcn() with the given base type T.
+ *
+ * Current compilers without refinement support simply use the given base type T.
+ */
+type TypeRefinement<T, refinementFcn extends RefinementFcn<T>> = T;
+```
