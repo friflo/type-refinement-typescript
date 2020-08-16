@@ -212,3 +212,6 @@ type TypeRefinement<T, refinementFcn extends RefinementFcn<T>> = T;
 
 -   Similar proposal this proposal oriented on  
     https://github.com/microsoft/TypeScript/issues/6579 "Suggestion: Regex-validated string type"
+
+-   Link to proposal at Typescript / GitHub  
+    https://github.com/microsoft/TypeScript/issues/40075
