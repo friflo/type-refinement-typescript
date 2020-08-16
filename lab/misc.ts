@@ -71,3 +71,18 @@ let isoDate = {} as IsoDate_refined;
 let monthID = {} as MonthID_refined;
 
 isoDate = monthID;
+
+interface IOrganization {
+    employeeCount: number;
+    externalCount: number;
+}
+
+type Organization = TypeRefinement<IOrganization, typeof isValidOrganization>;
+function isValidOrganization(val: IOrganization): Organization | undefined {
+    return val.externalCount < val.employeeCount ? val : undefined;
+}
+
+const organization: Organization = {
+    employeeCount: 20,
+    externalCount: 5
+};

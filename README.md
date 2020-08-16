@@ -1,4 +1,43 @@
-# Proposal: Optional static type refinement for Typescript
+# Proposal: Optional type refinement for Typescript
+
+The main goal of this proposal is to reflect constrains on primitives and objects via the type system.  
+To support this Typescript may introduce type refinement to express these constraints.
+
+Showing some small examples this would allow to e.g.:
+
+-   the string representation of a Date validates to a RegExp and apply a specific type at compile time.
+
+    ```ts
+    type IsoDateTime = TypeRefinement<string, typeof isIsoDateTime>;
+
+    function isIsoDateTime(val: string): IsoDateTime | undefined {
+        const regex = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
+        return regex.test(val) ? (val as IsoDateTime) : undefined;
+    }
+
+    const isoTimeOk: IsoDate = "2020-08-16T13:57:12.123Z"; // OK
+    const isoTimeErr: IsoDate = "16/8/2020"; // type refinement 'IsoDate' violates 'isIsoDate()'
+    ```
+
+-   adding a refined type to express that an object validates to the invariant.
+
+    ```ts
+    interface IOrganization {
+        employeeCount: number;
+        externalCount: number;
+    }
+
+    type Organization = TypeRefinement<IOrganization, typeof isValidOrganization>;
+
+    function isValidOrganization(val: IOrganization): Organization | undefined {
+        return val.externalCount < val.employeeCount ? val : undefined;
+    }
+
+    const organization: Organization = {
+        employeeCount: 20,
+        externalCount: 5
+    }; // OK
+    ```
 
 ## Goals
 
@@ -85,6 +124,6 @@ As a result:
 -   the union of two type refinements using the same base type is the union of both refined types
 -   the intersection of two type refinements using the same base type results in: never
 
-## Naming:
+## Naming
 
 Alternative naming could by: type restriction, reduction or constraint
