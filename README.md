@@ -1,7 +1,16 @@
 # Proposal: Optional type refinement for Typescript
 
-The main goal of this proposal is to reflect constrains on primitives and objects via the type system.  
-To support this Typescript may introduce type refinement to express these constraints.
+## Search Terms
+
+type narrowing, type constraints, class / interface invariant, regular expression, typescript
+
+Similar to https://github.com/microsoft/TypeScript/issues/6579 "Suggestion: Regex-validated string type"  
+with the goal to be more general and less intrusive by addressing the concerns noted in that proposal.
+
+## Suggestion
+
+The main goal of this proposal is to reflect constrains / invariants on primitives and objects via the type system.  
+To support this Typescript may introduce _type refinement_ to express these constraints. The refined types support validation of literals at compile time and can also be used for type narrowing in control flow based type analysis.
 
 ## Examples
 
@@ -54,6 +63,16 @@ const organization: Organization = {
 }; // OK (5 < 20)
 ```
 
+## Checklist
+
+My suggestion meets these guidelines:
+
+-   [x] This wouldn't be a breaking change in existing TypeScript/JavaScript code
+-   [x] This wouldn't change the runtime behavior of existing JavaScript code
+-   [x] This could be implemented without emitting different JS based on the types of the expressions
+-   [x] This isn't a runtime feature (e.g. library functionality, non-ECMAScript syntax with JavaScript output, etc.)
+-   [x] This feature would agree with the rest of [TypeScript's Design Goals]
+
 ## Goals
 
 -   Compile time checks for
@@ -66,7 +85,7 @@ const organization: Organization = {
     -   primitives: string, number and BigInt
     -   composed types: object
 
--   Compile time checks of refined types:
+-   Compile time checks of refined types for:
 
     -   assignments
     -   function calls - check signature
@@ -178,10 +197,14 @@ type TypeRefinement<T, refinementFcn extends RefinementFcn<T>> = T;
 
 ## Links
 
-The original proposal is located at:  
-https://github.com/friflo/type-refinement-typescript
+-   This proposal is also located at  
+    https://github.com/friflo/type-refinement-typescript
 
-This project contains:
 
--   The predefined type refinement types: `RefinementFcn` & `TypeRefinement`
--   Some additional examples compiling without errors.
+    This project contains:
+
+    -   The predefined type refinement types: `RefinementFcn` & `TypeRefinement`
+    -   Some additional examples compiling without errors.
+
+-   Similar proposal this proposal oriented on  
+    https://github.com/microsoft/TypeScript/issues/6579 "Suggestion: Regex-validated string type"
