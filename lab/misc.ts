@@ -54,7 +54,7 @@ const isMonthID: RefinementFcn<number> = (val: number): MonthID | undefined => {
 let monthOK: MonthID = 1;
 let isoTimeOk: IsoDate = "1978-12-20";
 
-monthOK = isoTimeOk;
+// monthOK = isoTimeOk;  // error: Type 'TypeRefinement<string, RefinementFcn<string>>' is not assignable to type 'number'.
 
 // ----------------
 
@@ -70,7 +70,7 @@ let isoDate = {} as IsoDate_refined;
 
 let monthID = {} as MonthID_refined;
 
-isoDate = monthID;
+// isoDate = monthID; //  ... Type 'TypeRefinement<string, RefinementFcn<string>>' is not assignable to type 'number'.
 
 interface IOrganization {
     employeeCount: number;

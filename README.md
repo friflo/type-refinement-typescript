@@ -168,3 +168,13 @@ type RefinementFcn<T> = (val: T, result?: { msg: string }) => T | undefined;
  */
 type TypeRefinement<T, refinementFcn extends RefinementFcn<T>> = T;
 ```
+
+## Links
+
+The original proposal is located at:  
+https://github.com/friflo/type-refinement-typescript
+
+This project contains:
+
+-   The predefined type refinement types: `RefinementFcn` & `TypeRefinement`
+-   Some additional examples compiling without errors.
